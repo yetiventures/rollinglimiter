@@ -86,6 +86,8 @@ public final class Ursa {
         Recovery next = queue.peek();
         if (!next.getAvailability().isAfter(instant)) {
           permits += queue.poll().getPermits();
+        } else {
+          break;
         }
       }
     }
