@@ -46,7 +46,7 @@ public final class Ursa {
   }
 
   public PermittedSession acquire(int permits)
-      throws PermitCapExceedException, InterruptedException {
+      throws PermitCapExceedException, UncheckInterruptedException {
     if (permits > cap) {
       throw new PermitCapExceedException(permits, cap);
     }
@@ -59,7 +59,12 @@ public final class Ursa {
       return PermittedSession.zero();
     }
 
-    semaphore.acquire(permits);
+    try {
+      semaphore.acquire(permits);
+    } catch (InterruptedException e) {
+      throw new UncheckInterruptedException(e);
+    }
+
     return new PermittedSession(permits, this::onSessionClose);
   }
 

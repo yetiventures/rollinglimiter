@@ -9,7 +9,7 @@ public abstract class UrsaException extends RuntimeException {
     super(message);
   }
 
-  UrsaException(String message, Throwable cause) {
-    super(message, cause);
+  UrsaException(Throwable cause) {
+    super(cause);
   }
 }
