@@ -25,7 +25,7 @@ public final class SlidingLimiter {
   private final Clock clock;
 
   private final AtomicReference<ScheduledFuture<?>> holder = new AtomicReference<>(null);
-  private final PriorityQueue<Recovery> queue = new PriorityQueue<>();
+  private final PriorityQueue<RecoveringPermits> queue = new PriorityQueue<>();
 
   public SlidingLimiter(RateLimit limit) {
     this.limit = limit;
@@ -77,7 +77,7 @@ public final class SlidingLimiter {
     Instant now = clock.instant();
     Instant availability = now.plus(limit.getPeriod());
     synchronized (queue) {
-      queue.offer(new Recovery(permits, availability));
+      queue.offer(new RecoveringPermits(permits, availability));
     }
     scheduleNextRefill();
   }
@@ -86,7 +86,7 @@ public final class SlidingLimiter {
     int permits = 0;
     synchronized (queue) {
       while (!queue.isEmpty()) {
-        Recovery next = queue.peek();
+        RecoveringPermits next = queue.peek();
         if (!next.getAvailability().isAfter(instant)) {
           permits += queue.poll().getPermits();
         } else {
@@ -99,7 +99,7 @@ public final class SlidingLimiter {
 
   private void scheduleNextRefill() {
     synchronized (queue) {
-      Recovery first = queue.peek();
+      RecoveringPermits first = queue.peek();
       if (first == null) {
         return;
       }
