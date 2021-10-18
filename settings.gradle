@@ -1,6 +1,8 @@
 include 'core-api'
+include 'cache'
 
 rootProject.name = 'io.contek.ursa'
 rootProject.children.each { project ->
     project.buildFileName = "${project.name}.gradle"
 }
+

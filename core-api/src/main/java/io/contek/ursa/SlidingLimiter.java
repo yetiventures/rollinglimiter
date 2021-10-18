@@ -17,11 +17,9 @@ import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 @ThreadSafe
-public final class Ursa {
+public final class SlidingLimiter {
 
-  private final int cap;
-  private final Duration window;
-
+  private final RateLimit limit;
   private final Semaphore semaphore;
   private final ListeningScheduledExecutorService scheduler;
   private final Clock clock;
@@ -29,26 +27,21 @@ public final class Ursa {
   private final AtomicReference<ScheduledFuture<?>> holder = new AtomicReference<>(null);
   private final PriorityQueue<Recovery> queue = new PriorityQueue<>();
 
-  public Ursa(int cap, Duration window) {
-    this.cap = cap;
-    this.window = window;
-    semaphore = new Semaphore(cap, true);
+  public SlidingLimiter(RateLimit limit) {
+    this.limit = limit;
+    semaphore = new Semaphore(limit.getPermits(), true);
     scheduler = createScheduler();
     clock = Clock.systemUTC();
   }
 
-  public int getCap() {
-    return cap;
+  public RateLimit getLimit() {
+    return limit;
   }
 
-  public Duration getWindow() {
-    return window;
-  }
-
-  public PermittedSession acquire(int permits)
+  public IPermitSession acquire(int permits)
       throws PermitCapExceedException, UncheckInterruptedException {
-    if (permits > cap) {
-      throw new PermitCapExceedException(permits, cap);
+    if (permits > limit.getPermits()) {
+      throw new PermitCapExceedException(permits, limit.getPermits());
     }
 
     if (permits < 0) {
@@ -56,7 +49,7 @@ public final class Ursa {
     }
 
     if (permits == 0) {
-      return PermittedSession.zero();
+      return ZeroPermitSession.getInstance();
     }
 
     try {
@@ -65,7 +58,7 @@ public final class Ursa {
       throw new UncheckInterruptedException(e);
     }
 
-    return new PermittedSession(permits, this::onSessionClose);
+    return new SimplePermitSession(canceled -> onSessionClose(permits, canceled));
   }
 
   private void onRefill() {
@@ -75,9 +68,14 @@ public final class Ursa {
     scheduleNextRefill();
   }
 
-  private void onSessionClose(int permits) {
+  private void onSessionClose(int permits, boolean immediate) {
+    if (immediate) {
+      semaphore.release(permits);
+      return;
+    }
+
     Instant now = clock.instant();
-    Instant availability = now.plus(window);
+    Instant availability = now.plus(limit.getPeriod());
     synchronized (queue) {
       queue.offer(new Recovery(permits, availability));
     }
