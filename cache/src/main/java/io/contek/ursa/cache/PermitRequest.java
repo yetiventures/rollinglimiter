@@ -54,17 +54,17 @@ public final class PermitRequest {
       return this;
     }
 
-    public PermitRequest build() {
+    public PermitRequest build() throws InvalidPermitRequestException {
       if (name == null) {
-        throw new IllegalArgumentException("Missing rate limit name");
+        throw new InvalidPermitRequestException("name");
       }
 
       if (key == null) {
-        throw new IllegalArgumentException("Missing rate limit key");
+        throw new InvalidPermitRequestException("key");
       }
 
       if (permits == null) {
-        throw new IllegalArgumentException("Missing rate limit permits");
+        throw new InvalidPermitRequestException("permits");
       }
 
       return new PermitRequest(name, key, permits);

@@ -5,11 +5,11 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public abstract class UrsaException extends RuntimeException {
 
-  UrsaException(String message) {
+  protected UrsaException(String message) {
     super(message);
   }
 
-  UrsaException(Throwable cause) {
+  protected UrsaException(Throwable cause) {
     super(cause);
   }
 }

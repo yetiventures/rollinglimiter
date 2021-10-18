@@ -8,7 +8,10 @@ import io.contek.ursa.RateLimit;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
@@ -38,7 +41,7 @@ public final class LimiterManager {
   public IPermitSession acquire(PermitRequest request) {
     CachingLimiter limiter = map.get(request.getName());
     if (limiter == null) {
-      throw new NoSuchElementException(request.getName());
+      throw new NoSuchRateLimitException(request.getName());
     }
 
     return limiter.acquire(request.getKey(), request.getPermits());
