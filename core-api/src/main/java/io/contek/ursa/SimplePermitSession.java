@@ -21,9 +21,9 @@ final class SimplePermitSession implements IPermitSession {
   }
 
   @Override
-  public void close() throws AlreadyClosedException {
+  public void close() {
     if (closed.getAndSet(true)) {
-      throw new AlreadyClosedException();
+      return;
     }
 
     onClose.accept(canceled.get());
