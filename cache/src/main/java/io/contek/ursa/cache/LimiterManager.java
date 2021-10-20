@@ -2,9 +2,7 @@ package io.contek.ursa.cache;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import io.contek.ursa.CombinePermitSession;
-import io.contek.ursa.IPermitSession;
-import io.contek.ursa.RateLimit;
+import io.contek.ursa.*;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -24,25 +22,36 @@ public final class LimiterManager {
   }
 
   public IPermitSession acquire(PermitRequest r1, PermitRequest r2, PermitRequest... rs)
-      throws InterruptedException {
+      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
     return acquire(Iterables.concat(Arrays.asList(r1, r2), Arrays.asList(rs)));
   }
 
-  public IPermitSession acquire(Iterable<PermitRequest> requests) throws InterruptedException {
+  public IPermitSession acquire(Iterable<PermitRequest> requests)
+      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
     List<IPermitSession> sessions = new ArrayList<>();
-    for (PermitRequest request : requests) {
-      sessions.add(acquire(request));
+    try {
+      for (PermitRequest request : requests) {
+        sessions.add(acquire(request));
+      }
+    } catch (PermitCapExceedException | AcquireTimeoutException | InterruptedException e) {
+      for (IPermitSession acquired : sessions) {
+        acquired.cancel();
+        acquired.close();
+      }
+      throw e;
     }
+
     return CombinePermitSession.wrap(sessions);
   }
 
-  public IPermitSession acquire(PermitRequest request) throws InterruptedException {
+  public IPermitSession acquire(PermitRequest request)
+      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
     CachingLimiter limiter = map.get(request.getRuleName());
     if (limiter == null) {
       throw new NoSuchRateLimitException(request.getRuleName());
     }
 
-    return limiter.acquire(request.getKey(), request.getPermits());
+    return limiter.acquire(request.getKey(), request.getPermits(), request.getTimeout());
   }
 
   @NotThreadSafe

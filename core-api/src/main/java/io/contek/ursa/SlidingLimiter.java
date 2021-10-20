@@ -2,6 +2,7 @@ package io.contek.ursa;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.time.Clock;
 import java.time.Duration;
@@ -38,7 +39,13 @@ public final class SlidingLimiter {
     return limit;
   }
 
-  public IPermitSession acquire(int permits) throws PermitCapExceedException, InterruptedException {
+  public IPermitSession acquire(int permits)
+      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
+    return acquire(permits, null);
+  }
+
+  public IPermitSession acquire(int permits, @Nullable Duration timeout)
+      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
     if (permits > limit.getPermits()) {
       throw new PermitCapExceedException(permits, limit.getPermits());
     }
@@ -51,7 +58,15 @@ public final class SlidingLimiter {
       return ZeroPermitSession.getInstance();
     }
 
-    semaphore.acquire(permits);
+    if (timeout == null) {
+      semaphore.acquire(permits);
+    } else {
+      boolean acquired = semaphore.tryAcquire(permits, timeout.toNanos(), NANOSECONDS);
+      if (!acquired) {
+        throw new AcquireTimeoutException(timeout);
+      }
+    }
+
     return new SimplePermitSession(canceled -> onSessionClose(permits, canceled));
   }
 
