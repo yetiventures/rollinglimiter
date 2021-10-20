@@ -63,8 +63,9 @@ public final class PermitRequest {
       return this;
     }
 
-    public void setTimeout(@Nullable Duration timeout) {
+    public Builder setTimeout(@Nullable Duration timeout) {
       this.timeout = timeout;
+      return this;
     }
 
     public PermitRequest build() throws InvalidPermitRequestException {
