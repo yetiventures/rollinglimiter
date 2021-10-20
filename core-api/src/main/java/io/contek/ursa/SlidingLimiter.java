@@ -38,8 +38,7 @@ public final class SlidingLimiter {
     return limit;
   }
 
-  public IPermitSession acquire(int permits)
-      throws PermitCapExceedException, UncheckInterruptedException {
+  public IPermitSession acquire(int permits) throws PermitCapExceedException, InterruptedException {
     if (permits > limit.getPermits()) {
       throw new PermitCapExceedException(permits, limit.getPermits());
     }
@@ -52,12 +51,7 @@ public final class SlidingLimiter {
       return ZeroPermitSession.getInstance();
     }
 
-    try {
-      semaphore.acquire(permits);
-    } catch (InterruptedException e) {
-      throw new UncheckInterruptedException(e);
-    }
-
+    semaphore.acquire(permits);
     return new SimplePermitSession(canceled -> onSessionClose(permits, canceled));
   }
 

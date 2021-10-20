@@ -8,13 +8,7 @@ import io.contek.ursa.RateLimit;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Streams.stream;
+import java.util.*;
 
 @ThreadSafe
 public final class LimiterManager {
@@ -29,19 +23,23 @@ public final class LimiterManager {
     return new Builder();
   }
 
-  public IPermitSession acquire(PermitRequest r1, PermitRequest r2, PermitRequest... rs) {
+  public IPermitSession acquire(PermitRequest r1, PermitRequest r2, PermitRequest... rs)
+      throws InterruptedException {
     return acquire(Iterables.concat(Arrays.asList(r1, r2), Arrays.asList(rs)));
   }
 
-  public IPermitSession acquire(Iterable<PermitRequest> requests) {
-    List<IPermitSession> sessions = stream(requests).map(this::acquire).collect(toImmutableList());
+  public IPermitSession acquire(Iterable<PermitRequest> requests) throws InterruptedException {
+    List<IPermitSession> sessions = new ArrayList<>();
+    for (PermitRequest request : requests) {
+      sessions.add(acquire(request));
+    }
     return CombinePermitSession.wrap(sessions);
   }
 
-  public IPermitSession acquire(PermitRequest request) {
-    CachingLimiter limiter = map.get(request.getName());
+  public IPermitSession acquire(PermitRequest request) throws InterruptedException {
+    CachingLimiter limiter = map.get(request.getRuleName());
     if (limiter == null) {
-      throw new NoSuchRateLimitException(request.getName());
+      throw new NoSuchRateLimitException(request.getRuleName());
     }
 
     return limiter.acquire(request.getKey(), request.getPermits());

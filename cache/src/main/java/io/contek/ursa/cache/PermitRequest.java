@@ -6,12 +6,12 @@ import javax.annotation.concurrent.NotThreadSafe;
 @Immutable
 public final class PermitRequest {
 
-  private final String name;
+  private final String ruleName;
   private final String key;
   private final int permits;
 
-  private PermitRequest(String name, String key, int permits) {
-    this.name = name;
+  private PermitRequest(String ruleName, String key, int permits) {
+    this.ruleName = ruleName;
     this.key = key;
     this.permits = permits;
   }
@@ -20,8 +20,8 @@ public final class PermitRequest {
     return new Builder();
   }
 
-  String getName() {
-    return name;
+  String getRuleName() {
+    return ruleName;
   }
 
   String getKey() {

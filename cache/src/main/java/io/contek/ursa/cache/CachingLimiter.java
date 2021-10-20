@@ -20,7 +20,7 @@ final class CachingLimiter {
     this.limit = limit;
   }
 
-  IPermitSession acquire(String key, int permits) {
+  IPermitSession acquire(String key, int permits) throws InterruptedException {
     SlidingLimiter limiter = map.computeIfAbsent(key, k -> create());
     return limiter.acquire(permits);
   }
