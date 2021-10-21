@@ -2,4 +2,4 @@ dependencies {
     implementation "com.google.guava:guava:${guavaVersion}"
 }
 
-description = 'Ursa Core API'
+description = 'Ursa Sliding Limiter Core API'

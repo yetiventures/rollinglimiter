@@ -2,3 +2,5 @@ dependencies {
     implementation project(':core-api')
     implementation "com.google.guava:guava:${guavaVersion}"
 }
+
+description = 'Ursa Sliding Limiter Cache'
