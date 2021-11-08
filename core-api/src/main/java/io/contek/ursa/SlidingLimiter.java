@@ -9,6 +9,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 
 import static com.google.common.util.concurrent.MoreExecutors.listeningDecorator;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -29,13 +30,44 @@ public final class SlidingLimiter {
     return limit;
   }
 
+  public IPermitSession acquire()
+      throws PermitCapExceedException, NegativePermitException, AcquireTimeoutException,
+          InterruptedException {
+    return acquire(null);
+  }
+
+  public IPermitSession acquire(@Nullable Duration timeout)
+      throws PermitCapExceedException, NegativePermitException, AcquireTimeoutException,
+          InterruptedException {
+    return acquire(1, timeout);
+  }
+
   public IPermitSession acquire(int permits)
-      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
+      throws PermitCapExceedException, NegativePermitException, AcquireTimeoutException,
+          InterruptedException {
     return acquire(permits, null);
   }
 
   public IPermitSession acquire(int permits, @Nullable Duration timeout)
-      throws PermitCapExceedException, AcquireTimeoutException, InterruptedException {
+      throws PermitCapExceedException, NegativePermitException, AcquireTimeoutException,
+          InterruptedException {
+    IPermitSession session = tryAcquire(permits, timeout);
+    if (session == null) {
+      throw new AcquireTimeoutException(requireNonNull(timeout));
+    }
+
+    return session;
+  }
+
+  @Nullable
+  public IPermitSession tryAcquire(@Nullable Duration timeout)
+      throws PermitCapExceedException, NegativePermitException, InterruptedException {
+    return tryAcquire(1, timeout);
+  }
+
+  @Nullable
+  public IPermitSession tryAcquire(int permits, @Nullable Duration timeout)
+      throws PermitCapExceedException, NegativePermitException, InterruptedException {
     if (permits > limit.getPermits()) {
       throw new PermitCapExceedException(permits, limit.getPermits());
     }
@@ -53,7 +85,7 @@ public final class SlidingLimiter {
     } else {
       boolean acquired = semaphore.tryAcquire(permits, timeout.toNanos(), NANOSECONDS);
       if (!acquired) {
-        throw new AcquireTimeoutException(timeout);
+        return null;
       }
     }
 
