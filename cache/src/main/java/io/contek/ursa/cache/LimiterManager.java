@@ -3,9 +3,9 @@ package io.contek.ursa.cache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import io.contek.ursa.*;
-import net.jcip.annotations.ThreadSafe;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.*;
 
 @ThreadSafe

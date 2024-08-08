@@ -1,9 +1,9 @@
 package io.contek.ursa.cache;
 
 import io.contek.ursa.*;
-import net.jcip.annotations.ThreadSafe;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;

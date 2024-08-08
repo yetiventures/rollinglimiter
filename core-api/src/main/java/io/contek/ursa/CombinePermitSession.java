@@ -1,7 +1,8 @@
 package io.contek.ursa;
 
 import com.google.common.collect.ImmutableList;
-import net.jcip.annotations.ThreadSafe;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 @ThreadSafe
 public final class CombinePermitSession implements IPermitSession {
