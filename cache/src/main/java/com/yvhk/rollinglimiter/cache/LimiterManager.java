@@ -1,8 +1,8 @@
-package io.contek.ursa.cache;
+package com.yvhk.rollinglimiter.cache;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import io.contek.ursa.*;
+import com.yvhk.rollinglimiter.*;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.annotation.concurrent.ThreadSafe;

@@ -1,4 +1,4 @@
-package io.contek.ursa.cache;
+package com.yvhk.rollinglimiter.cache;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;

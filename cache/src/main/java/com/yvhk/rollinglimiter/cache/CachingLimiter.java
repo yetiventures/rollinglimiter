@@ -1,6 +1,6 @@
-package io.contek.ursa.cache;
+package com.yvhk.rollinglimiter.cache;
 
-import io.contek.ursa.*;
+import com.yvhk.rollinglimiter.*;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;

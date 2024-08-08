@@ -1,6 +1,6 @@
-package io.contek.ursa.cache;
+package com.yvhk.rollinglimiter.cache;
 
-import io.contek.ursa.UrsaException;
+import com.yvhk.rollinglimiter.UrsaException;
 
 import javax.annotation.concurrent.NotThreadSafe;
 

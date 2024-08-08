@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @ReturnValuesAreNonnullByDefault
-package io.contek.ursa;
+package com.yvhk.rollinglimiter.cache;
 
 import edu.umd.cs.findbugs.annotations.ReturnValuesAreNonnullByDefault;
 

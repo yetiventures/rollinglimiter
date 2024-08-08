@@ -1,4 +1,4 @@
-package io.contek.ursa;
+package com.yvhk.rollinglimiter;
 
 import javax.annotation.concurrent.Immutable;
 import java.time.Duration;

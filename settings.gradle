@@ -1,7 +1,7 @@
 include 'core-api'
 include 'cache'
 
-rootProject.name = 'io.contek.ursa'
+rootProject.name = 'com.yvhk.rollinglimiter'
 rootProject.children.each { project ->
     project.buildFileName = "${project.name}.gradle"
 }

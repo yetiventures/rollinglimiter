@@ -1,4 +1,4 @@
-package io.contek.ursa;
+package com.yvhk.rollinglimiter;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 

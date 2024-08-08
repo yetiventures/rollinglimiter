@@ -1,4 +1,4 @@
-package io.contek.ursa;
+package com.yvhk.rollinglimiter;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.atomic.AtomicBoolean;
