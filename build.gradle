@@ -1,9 +1,12 @@
+plugins {
+    id('java-library')
+    id('org.jreleaser') version('1.13.1')
+}
+
 subprojects {
 
-    plugins {
-        id('java-library')
-        id('org.jreleaser') version('1.13.1')
-    }
+    apply plugin: 'java-library'
+    apply plugin: 'org.jreleaser'
 
     ext {
         guavaVersion = '33.2.1-jre'
