@@ -6,7 +6,7 @@ import java.time.Duration;
 import static java.lang.String.format;
 
 @NotThreadSafe
-public final class AcquireTimeoutException extends UrsaException {
+public final class AcquireTimeoutException extends RollingLimiterException {
 
   AcquireTimeoutException(Duration duration) {
     super(format("Acquire permit timeout %s exceeded", duration));

@@ -3,4 +3,4 @@ dependencies {
     implementation "com.google.guava:guava:${guavaVersion}"
 }
 
-description = 'Ursa Sliding Limiter Cache'
+description = 'Rolling Limiter Cache'

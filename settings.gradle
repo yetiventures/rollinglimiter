@@ -1,3 +1,12 @@
+pluginManagement {
+    repositories {
+        maven {
+            url('https://plugins.gradle.org/m2/')
+        }
+        gradlePluginPortal()
+    }
+}
+
 include 'core-api'
 include 'cache'
 
@@ -5,4 +14,3 @@ rootProject.name = 'com.yvhk.rollinglimiter'
 rootProject.children.each { project ->
     project.buildFileName = "${project.name}.gradle"
 }
-

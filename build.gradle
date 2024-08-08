@@ -1,104 +1,41 @@
-static def isSnapshot(version) {
-    return version.contains("SNAPSHOT")
-}
-
-static def getRepositoryUrl(version) {
-    if (isSnapshot(version)) {
-        return 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
-    return 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-}
-
 subprojects {
 
-    ext {
-        guavaVersion = '31.1-jre'
+    plugins {
+        id('java-library')
+        id('org.jreleaser') version('1.13.1')
     }
 
-    apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
-    apply plugin: 'signing'
-
-    sourceCompatibility = '1.17'
-    targetCompatibility = '1.17'
+    ext {
+        guavaVersion = '33.2.1-jre'
+    }
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        compileOnly 'javax.annotation:jsr250-api:1.0'
-        compileOnly 'com.github.spotbugs:spotbugs-annotations:4.7.3'
+        compileOnly 'javax.annotation:javax.annotation-api:1.3.2'
+        compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
     }
 
     group = 'com.yvhk.rollinglimiter'
-    version = '1.3.1'
+    version = '1.0.0'
 
-    task sourcesJar(type: Jar) {
-        from sourceSets.main.allSource
-        archiveClassifier.set('sources')
-    }
-
-    task javadocJar(type: Jar) {
-        from javadoc
-        javadoc.options.addStringOption('Xdoclint:none', '-quiet')
-        archiveClassifier.set('javadoc')
-    }
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = "ursa-${project.name}"
-                from components.java
-                artifact sourcesJar
-                artifact javadocJar
-
-                pom {
-                    afterEvaluate {
-                        name = project.description
-                        description = project.description
-                    }
-
-                    url = 'https://github.com/yetiventures/com.yvhk.rollinglimiter'
-
-                    scm {
-                        connection = 'scm:git:git://github.com/yetiventures/com.yvhk.rollinglimiter.git'
-                        developerConnection = 'scm:git:ssh://github.com/yetiventures/com.yvhk.rollinglimiter.git'
-                        url = 'http://github.com/yetiventures/com.yvhk.rollinglimiter/tree/master'
-                    }
-
-                    licenses {
-                        license {
-                            name = 'MIT License'
-                            url = 'https://opensource.org/licenses/MIT'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = 'yetiventures'
-                            name = 'Dev Yeti Ventures'
-                            email = 'dev@yvhk.com'
-                            organization = 'Yeti Ventures'
-                            organizationUrl = 'https://yvhk.com'
-                        }
-                    }
-                }
-            }
+    jreleaser {
+        signing {
+            active = 'ALWAYS'
+            armored = true
         }
-        repositories {
+        deploy {
             maven {
-                url = getRepositoryUrl(version)
-                credentials {
-                    username = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
-                    password = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+                mavenCentral {
+                    sonatype {
+                        active = 'ALWAYS'
+                        url = 'https://central.sonatype.com/api/v1/publisher'
+                        stagingRepository('target/staging-deploy')
+                    }
                 }
             }
         }
-    }
-
-    signing {
-        required { !isSnapshot(version) }
-        sign publishing.publications.mavenJava
     }
 }
