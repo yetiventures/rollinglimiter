@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jreleaser' version '1.13.1'
+}
+
+ext {
+    guavaVersion = '33.2.1-jre'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'javax.annotation:javax.annotation-api:1.3.2'
+    compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
+
+    implementation "com.google.guava:guava:${guavaVersion}"
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+group = 'com.yvhk.rollinglimiter'
+version = '1.0.0'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = "rollinglimiter"
+
+            from components.java
+
+            pom {
+                name = 'rollinglimiter'
+                description = 'Rolling Limiter'
+                url = 'https://github.com/yetiventures/rollinglimiter'
+                inceptionYear = '2024'
+                licenses {
+                    license {
+                        name = 'Apache-2.0'
+                        url = 'https://spdx.org/licenses/Apache-2.0.html'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'yetiventures'
+                        name = 'Yeti Ventures'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/yetiventures/rollinglimiter.git'
+                    developerConnection = 'scm:git:ssh://github.com/yetiventures/rollinglimiter.git'
+                    url = 'http://github.com/yetiventures/rollinglimiter'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir('staging-deploy')
+        }
+    }
+}
+
+jreleaser {
+    gitRootSearch = true
+    signing {
+        active = 'ALWAYS'
+        armored = true
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            }
+
+        }
+    }
+}
