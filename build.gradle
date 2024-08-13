@@ -1,11 +1,13 @@
 plugins {
     id('java-library')
+    id('maven-publish')
     id('org.jreleaser') version('1.13.1')
 }
 
 subprojects {
 
     apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
     apply plugin: 'org.jreleaser'
 
     ext {
@@ -21,8 +23,52 @@ subprojects {
         compileOnly 'com.github.spotbugs:spotbugs-annotations:4.8.6'
     }
 
-    group = 'com.yvhk.rollinglimiter'
-    version = '1.0.0'
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'com.yvhk.rollinglimiter'
+                artifactId = "rollinglimiter-${project.name}"
+                version = '1.0.0'
+
+                from components.java
+
+                pom {
+                    name = 'rollinglimiter'
+                    description = 'Rolling Limiter'
+                    url = 'https://github.com/yetiventures/rollinglimiter'
+                    inceptionYear = '2024'
+                    licenses {
+                        license {
+                            name = 'Apache-2.0'
+                            url = 'https://spdx.org/licenses/Apache-2.0.html'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'yetiventures'
+                            name = 'Yeti Ventures'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/yetiventures/rollinglimiter.git'
+                        developerConnection = 'scm:git:ssh://github.com/yetiventures/rollinglimiter.git'
+                        url = 'http://github.com/yetiventures/rollinglimiter'
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                url = layout.buildDirectory.dir('staging-deploy')
+            }
+        }
+    }
 
     jreleaser {
         signing {
@@ -31,11 +77,14 @@ subprojects {
         }
         deploy {
             maven {
-                mavenCentral {
-                    sonatype {
+                nexus2 {
+                    'maven-central' {
                         active = 'ALWAYS'
-                        url = 'https://central.sonatype.com/api/v1/publisher'
-                        stagingRepository('target/staging-deploy')
+                        url = 'https://s01.oss.sonatype.org/service/local'
+                        snapshotUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+                        closeRepository = true
+                        releaseRepository = true
+                        stagingRepository('build/staging-deploy')
                     }
                 }
             }
